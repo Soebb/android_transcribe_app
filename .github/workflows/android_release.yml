@@ -67,7 +67,7 @@ jobs:
           ${{ runner.os }}-gradle-
 
     - name: Build Standard Debug APK
-      run: ./gradlew assembleStandardDebug
+      run: ./gradlew assembleDebug
 
     - name: Extract Version Name
       id: extract_version
