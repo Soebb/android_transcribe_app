@@ -66,23 +66,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-    # Keep one signing key across builds so installed APKs remain updatable.
-    - name: Restore release signing key
-      uses: actions/cache@v4
-      with:
-        path: release.keystore
-        key: ${{ runner.os }}-android-release-keystore-v1
-
-    - name: Create release signing key if missing
-      run: |
-        if [ ! -f release.keystore ]; then
-          keytool -genkeypair -v -keystore release.keystore -storepass password -alias release -keypass password -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Soebb Android Release,O=Soebb,C=US"
-        fi
-
-    - name: Build Release APKs
-      run: |
-        ./gradlew assembleStandardRelease
-
+    - name: Build Standard Debug APK
+      run: ./gradlew assembleStandardDebug
 
     - name: Extract Version Name
       id: extract_version
@@ -91,12 +76,12 @@ jobs:
         echo "Detected Version: $VERSION_NAME"
         echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
 
-    - name: Rename Artifacts
+    - name: Rename Debug APK
       run: |
-        cp app/build/outputs/apk/standard/release/app-standard-release.apk android_transcribe_app_v${{ env.VERSION_NAME }}.apk
+        cp app/build/outputs/apk/standard/debug/app-standard-debug.apk android_transcribe_app_v${{ env.VERSION_NAME }}_debug.apk
 
-    - name: Upload APK Artifact
+    - name: Upload Debug APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: app-release-apk-v${{ env.VERSION_NAME }}
-        path: android_transcribe_app_v${{ env.VERSION_NAME }}.apk
+        name: app-debug-apk-v${{ env.VERSION_NAME }}
+        path: android_transcribe_app_v${{ env.VERSION_NAME }}_debug.apk
