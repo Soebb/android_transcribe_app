@@ -66,8 +66,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-    - name: Build Standard Debug APK
-      run: ./gradlew assembleDebug
+    - name: Build Standard Release APK
+      run: ./gradlew assembleStandardRelease
 
     - name: Extract Version Name
       id: extract_version
@@ -76,12 +76,12 @@ jobs:
         echo "Detected Version: $VERSION_NAME"
         echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
 
-    - name: Rename Debug APK
+    - name: Rename Release APK
       run: |
-        cp app/build/outputs/apk/standard/debug/app-standard-debug.apk android_transcribe_app_v${{ env.VERSION_NAME }}_debug.apk
+        cp app/build/outputs/apk/standard/release/app-standard-release.apk android_transcribe_app_v${{ env.VERSION_NAME }}_release.apk
 
-    - name: Upload Debug APK Artifact
+    - name: Upload Release APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug-apk-v${{ env.VERSION_NAME }}
+        name: app-release-apk-v${{ env.VERSION_NAME }}
         path: android_transcribe_app_v${{ env.VERSION_NAME }}_debug.apk
