@@ -76,13 +76,7 @@ jobs:
     - name: Create release signing key if missing
       run: |
         if [ ! -f release.keystore ]; then
-          keytool -genkeypair -v \\
-            -keystore release.keystore \\
-            -storepass password \\
-            -alias release \\
-            -keypass password \\
-            -keyalg RSA -keysize 2048 -validity 10000 \\
-            -dname "CN=Soebb Android Release,O=Soebb,C=US"
+          keytool -genkeypair -v -keystore release.keystore -storepass password -alias release -keypass password -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Soebb Android Release,O=Soebb,C=US"
         fi
 
     - name: Build Release APKs
