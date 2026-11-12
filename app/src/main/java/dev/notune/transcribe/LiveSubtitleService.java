@@ -454,27 +454,6 @@ public class LiveSubtitleService extends Service {
             if (mSubtitleText == null) return;
             if (isFinal) {
                 if (text.isEmpty()) return; // nothing new — leave display alone
-                if (mCommittedText.length() > 0) mCommittedText.append(' ');
-                mCommittedText.append(text);
-                int excess = mCommittedText.length() - MAX_COMMITTED_CHARS;
-                if (excess > 0) {
-                    mCommittedText.delete(0, excess);
-                    mCommittedBase += excess;
-                }
-                updateDisplay("");
-            } else {
-                updateDisplay(text);
-            }
-        });
-    }
-
-    // Called from Rust (worker thread). isFinal=true commits the text;
-    // isFinal=false is a partial hypothesis that replaces the previous one.
-    public void onSubtitleText(String text, boolean isFinal) {
-        mMainHandler.post(() -> {
-            if (mSubtitleText == null) return;
-            if (isFinal) {
-                if (text.isEmpty()) return; // nothing new — leave display alone
                 if (mTranslationMode) {
                     mLastPartial = "";
                     onFinalTranslated(text);
