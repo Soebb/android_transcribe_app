@@ -170,9 +170,7 @@ public final class OnDeviceSubtitleTranslator implements SubtitleTranslator {
                     .addOnSuccessListener(tag -> {
                         String picked = SourceLanguageResolver.pickSource(
                                 tag, text, sessionSource());
-                        if (BuildConfig.DEBUG) {
-                            Log.d(TAG, "Language ID: '" + tag + "' -> source " + picked);
-                        }
+                        Log.d(TAG, "Language ID: '" + tag + "' -> source " + picked);
                         sink.onSource(rememberSource(picked));
                     })
                     .addOnFailureListener(e -> {
