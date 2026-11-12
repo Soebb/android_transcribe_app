@@ -11,7 +11,6 @@ import com.google.mlkit.nl.translate.TranslatorOptions;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,16 +51,9 @@ public final class OnDeviceSubtitleTranslator implements SubtitleTranslator {
         void onSource(String sourceLanguage);
     }
     private static String languageConstant(String code) {
-        if (code == null) return null;
-        try {
-            List<String> all = TranslateLanguage.getAllLanguages();
-            if (all.contains(code)) return code;
-            // Legacy aliases (iw/in/nb) and region-qualified tags.
-            String mapped = TranslateLanguage.fromLanguageTag(code);
-            return (mapped != null && all.contains(mapped)) ? mapped : null;
-        } catch (Throwable t) {
-            return null;
-        }
+        if ("en".equals(code)) return TranslateLanguage.ENGLISH;
+        if ("fa".equals(code)) return TranslateLanguage.PERSIAN;
+        return null;
     }
 
     /**
@@ -76,7 +68,7 @@ public final class OnDeviceSubtitleTranslator implements SubtitleTranslator {
         try {
             TranslatorOptions probeOpts = new TranslatorOptions.Builder()
                     .setSourceLanguage(TranslateLanguage.ENGLISH)
-                    .setTargetLanguage(TranslateLanguage.SPANISH)
+                    .setTargetLanguage(TranslateLanguage.PERSIAN)
                     .build();
             probe = Translation.getClient(probeOpts);
             available = true;
