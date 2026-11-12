@@ -53,6 +53,66 @@ public final class OnDeviceSubtitleTranslator implements SubtitleTranslator {
         return SubtitleTranslationTargets.mlKitCode(code);
     }
 
+    /** Callback for preparing a target language model before the user proceeds. */
+    public interface ModelDownloadCallback {
+        void onReady();
+        void onFailure(Throwable error);
+    }
+
+    /**
+     * Ensures the selected target language model is downloaded before the
+     * translation setting is saved. When the model is already installed,
+     * ML Kit completes this task immediately.
+     */
+    public void prepareModel(String sourceLanguage, String targetLanguage,
+                             ModelDownloadCallback callback) {
+        final String source = languageConstant(sourceLanguage);
+        final String target = languageConstant(targetLanguage);
+        if (source == null || target == null) {
+            callback.onFailure(new IllegalArgumentException("Unsupported translation language"));
+            return;
+        }
+        if (source.equals(target)) {
+            callback.onReady();
+            return;
+        }
+
+        final String key = source + ":" + target;
+        final Translator translator;
+        synchronized (this) {
+            if (downloaded.contains(key)) {
+                callback.onReady();
+                return;
+            }
+            try {
+                Translator existing = translators.get(key);
+                if (existing != null) {
+                    translator = existing;
+                } else {
+                    TranslatorOptions options = new TranslatorOptions.Builder()
+                            .setSourceLanguage(source)
+                            .setTargetLanguage(target)
+                            .build();
+                    translator = Translation.getClient(options);
+                    translators.put(key, translator);
+                }
+            } catch (Throwable error) {
+                callback.onFailure(error);
+                return;
+            }
+        }
+
+        translator.downloadModelIfNeeded()
+                .addOnSuccessListener(unused -> {
+                    synchronized (OnDeviceSubtitleTranslator.this) {
+                        downloaded.add(key);
+                        failed.remove(key);
+                    }
+                    callback.onReady();
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
     /**
      * Lazy availability probe. Creating a client on a device without ML Kit /
      * Google Play Services fails fast, so we remember the outcome for the
