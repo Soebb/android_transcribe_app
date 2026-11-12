@@ -16,8 +16,6 @@ import java.util.Set;
 
 /**
  * On-device text translation for live subtitles backed by Google ML Kit
-.
- *
  * <p>ML Kit translates fully on-device once the per-pair language packs are
  * downloaded (the first use downloads them through Google Play Services;
  * afterwards no network involvement is needed for the actual translation). On
