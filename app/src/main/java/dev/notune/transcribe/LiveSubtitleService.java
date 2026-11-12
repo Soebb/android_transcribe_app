@@ -154,24 +154,9 @@ public class LiveSubtitleService extends Service {
             mAudioThread = null;
         }
         if (mAudioRecord != null) {
-            try {
-                // stop() is only valid after AudioRecord has been initialized
-                // and is actively recording. A failed initialization must not
-                // cause a second exception during session cleanup.
-                if (mAudioRecord.getState() == AudioRecord.STATE_INITIALIZED
-                        && mAudioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
-                    mAudioRecord.stop();
-                }
-            } catch (IllegalStateException e) {
-                Log.w(TAG, "AudioRecord could not be stopped cleanly", e);
-            } finally {
-                try {
-                    mAudioRecord.release();
-                } catch (RuntimeException e) {
-                    Log.w(TAG, "AudioRecord could not be released cleanly", e);
-                }
-                mAudioRecord = null;
-            }
+            mAudioRecord.stop();
+            mAudioRecord.release();
+            mAudioRecord = null;
         }
         if (mMediaProjection != null) {
             mMediaProjection.stop();
