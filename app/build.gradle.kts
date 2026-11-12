@@ -104,6 +104,7 @@ if (!isBundle) {
 dependencies {
     // Material Components (Material 3 / Material You). Pulls in AppCompat.
     implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.activity:activity:1.9.3")
 
     // On-device live-subtitle translation (Google ML Kit).
     implementation("com.google.mlkit:translate:17.0.3")
