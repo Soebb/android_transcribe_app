@@ -63,12 +63,21 @@ public final class SubtitlePrefs {
 
     /** BCP-47 target tag, or "auto" to keep the recognized source language. */
     public static String getTranslationTarget(Context ctx) {
-        String value = MarkerFileHelper.readString(ctx, TRANSLATION_TARGET_FILE, "auto");
-        return SubtitleTranslationTargets.isValid(value) ? value : SubtitleTranslationTargets.AUTO;
+        File file = new File(ctx.getFilesDir(), TRANSLATION_TARGET_FILE);
+        if (!file.exists()) return SubtitleTranslationTargets.AUTO;
+        try {
+            String value = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8).trim();
+            return SubtitleTranslationTargets.isValid(value) ? value : SubtitleTranslationTargets.AUTO;
+        } catch (IOException e) {
+            return SubtitleTranslationTargets.AUTO;
+        }
     }
 
     public static void setTranslationTarget(Context ctx, String tag) {
-        MarkerFileHelper.writeString(ctx, TRANSLATION_TARGET_FILE,
-                SubtitleTranslationTargets.isValid(tag) ? tag : SubtitleTranslationTargets.AUTO);
+        File file = new File(ctx.getFilesDir(), TRANSLATION_TARGET_FILE);
+        String value = SubtitleTranslationTargets.isValid(tag) ? tag : SubtitleTranslationTargets.AUTO;
+        try {
+            Files.write(file.toPath(), value.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException ignored) { }
     }
 }
