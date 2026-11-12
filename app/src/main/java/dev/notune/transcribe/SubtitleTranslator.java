@@ -1,7 +1,7 @@
 package dev.notune.transcribe;
 
 /**
- * Plug-in point for live-subtitle text translation (fork addition). A
+ * Plug-in point for live-subtitle text translation. A
  * translator receives the <em>finalized</em> source text of one subtitle
  * segment and delivers either the translation or — by calling
  * {@link Callback#onSuccess(String)} with the source text — a fallback that
