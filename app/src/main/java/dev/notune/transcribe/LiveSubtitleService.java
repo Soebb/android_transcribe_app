@@ -542,9 +542,10 @@ public class LiveSubtitleService extends Service {
     /** Applies a translation (or its fallback) to the matching pending segment
      *  and keeps the queue moving. Runs on the main thread. */
     private void applyTranslation(TranslationJob job, String translated) {
+        // Ignore stale callbacks before touching the new session's queue state.
+        if (job.generation != mTranslationGeneration) return;
         mTranslationBusy = false;
         mTranslationQueue.remove(job);
-        if (job.generation != mTranslationGeneration) return; // stale session
         // Strict FIFO: the first segment still pending is the one this job
         // belongs to (punct-only finals are finalized immediately, so they
         // never create jobs and never shift this correspondence).
