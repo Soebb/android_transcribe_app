@@ -42,6 +42,7 @@ public class LiveSubtitleActivity extends AppCompatActivity {
     private MediaProjectionManager mProjectionManager;
     private boolean mWaitingForOverlayPermission = false;
     private boolean mProjectionStarted = false;
+    private boolean mTranslationScreenInitialized = false;
     private ProgressDialog mTranslationDownloadDialog;
     private OnDeviceSubtitleTranslator mModelPreloader;
     private String mPreviousTranslationTarget = SubtitleTranslationTargets.AUTO;
@@ -68,6 +69,24 @@ public class LiveSubtitleActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
+
+        mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+
+        // Request overlay permission before showing the translation settings.
+        if (Settings.canDrawOverlays(this)) {
+            showTranslationScreen();
+        } else {
+            mWaitingForOverlayPermission = true;
+            openOverlaySettings();
+        }
+    }
+
+    private void showTranslationScreen() {
+        if (mTranslationScreenInitialized) {
+            return;
+        }
+        mTranslationScreenInitialized = true;
+
         setContentView(R.layout.activity_live_subtitle);
 
         View rootView = findViewById(R.id.live_subtitle_root);
@@ -80,8 +99,6 @@ public class LiveSubtitleActivity extends AppCompatActivity {
                 return windowInsets;
             });
         }
-
-        mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
         setupSubtitleTranslationSpinner(findViewById(R.id.spinner_subtitle_translation));
         findViewById(R.id.btn_live_subs_start).setOnClickListener(v -> beginSubtitleFlow());
@@ -127,17 +144,14 @@ public class LiveSubtitleActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        // Returning from the overlay-permission settings page. If it was
-        // granted, continue straight into the screen-capture consent; if not,
-        // stay on the start screen so the user can retry or adjust the
-        // translation target (unlike the old transient flow, this screen is
-        // the configuration point for a session).
+        // Show translation settings only after overlay permission is granted.
         if (mWaitingForOverlayPermission) {
             mWaitingForOverlayPermission = false;
             if (Settings.canDrawOverlays(this)) {
-                startProjection();
+                showTranslationScreen();
             } else {
                 Toast.makeText(this, getString(R.string.subs_overlay_required), Toast.LENGTH_SHORT).show();
+                finish();
             }
         }
     }
