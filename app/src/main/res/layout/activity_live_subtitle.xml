@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Live-subtitle start screen (fork addition): the user picks the
+<!-- Live-subtitle start screen: the user picks the
      translation target here, right before starting a captioning session,
      so the main screen stays free of subtitle-specific settings. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
