@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Live-subtitle start screen (fork addition). The user picks the translation
+ * Live-subtitle start screen. The user picks the translation
  * target here — "Auto (original language)" keeps the spoken language, a fixed
  * tag arms the on-device translator at the next session — and then starts the
  * captioning flow (overlay permission → screen-capture consent → service).
@@ -251,7 +251,7 @@ public class LiveSubtitleActivity extends AppCompatActivity {
     }
 
     /**
-     * Live-subtitle translation target (fork addition). "Auto (original
+     * Live-subtitle translation target. "Auto (original
      * language)" keeps the spoken language (the product decision for this
      * feature); a fixed target translates finalized subtitles on-device.
      * Display names come from {@link Locale#getDisplayName()}, so they follow
