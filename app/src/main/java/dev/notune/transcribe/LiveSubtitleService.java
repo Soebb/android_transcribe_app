@@ -194,7 +194,7 @@ public class LiveSubtitleService extends Service {
         mCommittedBase = 0;
         mWindowStartAbs = 0;
         mDisplayedEndAbs = 0;
-        // Translation session init (fork addition). "Auto" keeps the original
+        // Translation session initialization. "Auto" keeps the original
         // language and the classic pipeline; an explicit target arms the
         // on-device translator for this session only.
         mTranslationTarget = SubtitlePrefs.getTranslationTarget(this);
@@ -400,8 +400,7 @@ public class LiveSubtitleService extends Service {
     // Absolute offset of the end of the currently displayed transcript.
     private long mDisplayedEndAbs = 0;
 
-    // --- Live-subtitle translation support (ported from Test-transcribe) ---
-    // --- Live-subtitle translation (fork addition) -------------------------
+    // --- Live-subtitle translation -----------------------------------------
     // When the user picks an explicit translation target, finalized segments
     // are shown immediately in the original language and re-rendered in the
     // target language as the ordered on-device translations arrive. All state
@@ -478,7 +477,7 @@ public class LiveSubtitleService extends Service {
         });
     }
 
-    // --- Translation-mode caption pipeline (fork addition) -----------------
+    // --- Translation-mode caption pipeline ---------------------------------
 
     /** A finalized segment arrives: show it in the original language at once
      *  and enqueue the on-device translation (unless it is punctuation or the
