@@ -658,46 +658,6 @@ public class LiveSubtitleService extends Service {
     }
 
     /** Renders committed text + partial through the forward-only caption window. */
-    private void updateDisplay(String partial) {
-        String full = partial.isEmpty()
-                ? mCommittedText.toString()
-                : (mCommittedText.length() == 0 ? partial : mCommittedText + " " + partial);
-
-        // A final can end before the partial that was just on screen (the
-        // forced-cut remainder belongs to the next segment, and the final
-        // transcription may stop earlier than the last hypothesis). Redrawing
-        // then would make already-read words vanish and "pop up" again with
-        // the next partial — so only redraw once the transcript reaches at
-        // least as far as what is currently displayed.
-        long fullEndAbs = mCommittedBase + full.length();
-        if (fullEndAbs < mDisplayedEndAbs) return;
-        mDisplayedEndAbs = fullEndAbs;
-
-        if (mMaxLines <= 0) {
-            mSubtitleText.setText(full);
-            return;
-        }
-
-        int rel = (int) Math.max(0, Math.min(mWindowStartAbs - mCommittedBase, full.length()));
-        // Cosmetic: never start the window on the separator space.
-        while (rel < full.length() && full.charAt(rel) == ' ') rel++;
-        String visible = full.substring(rel);
-
-        int width = mSubtitleText.getWidth()
-                - mSubtitleText.getPaddingLeft() - mSubtitleText.getPaddingRight();
-        if (width > 0 && !visible.isEmpty()) {
-            StaticLayout layout = StaticLayout.Builder
-                    .obtain(visible, 0, visible.length(), mSubtitleText.getPaint(), width)
-                    .build();
-            int lineCount = layout.getLineCount();
-            if (lineCount > mMaxLines) {
-                int cut = layout.getLineStart(lineCount - mMaxLines);
-                visible = visible.substring(cut);
-                mWindowStartAbs = mCommittedBase + rel + cut;
-            }
-        }
-        mSubtitleText.setText(visible);
-    }
 
     /** Reads the optional language hint used by imported speech models. */
     private String readModelLanguage() {
