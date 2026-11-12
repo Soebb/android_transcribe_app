@@ -25,9 +25,8 @@ import java.util.Set;
  * falls back to the source text, so subtitles never disappear: the safe-fallback
  * guarantee is the same one the ASR and the AI post-processor already provide.
  *
- * <p>Only the language subset the app actually offers is wired to ML Kit
- * constants ({@link #languageConstant(String)}); unknown codes short-circuit
- * to the source text. Translators are cached per (source, target) pair and
+ * <p>Every language exposed by the installed ML Kit Translation SDK is
+ * accepted. Translators are cached per (source, target) pair and
  * pack-download state is remembered per pair for the session.
  */
 public final class OnDeviceSubtitleTranslator implements SubtitleTranslator {
@@ -51,9 +50,7 @@ public final class OnDeviceSubtitleTranslator implements SubtitleTranslator {
         void onSource(String sourceLanguage);
     }
     private static String languageConstant(String code) {
-        if ("en".equals(code)) return TranslateLanguage.ENGLISH;
-        if ("fa".equals(code)) return TranslateLanguage.PERSIAN;
-        return null;
+        return SubtitleTranslationTargets.mlKitCode(code);
     }
 
     /**
