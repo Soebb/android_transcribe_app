@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView benchResultText;
     private Button modelsButton;
     private boolean benchRunning;
+    private boolean mWaitingForSubtitleOverlayPermission;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,10 +81,7 @@ public class MainActivity extends AppCompatActivity {
              startActivity(intent);
         });
 
-        startSubsButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, LiveSubtitleActivity.class);
-            startActivity(intent);
-        });
+        startSubsButton.setOnClickListener(v -> openLiveSubtitleEntry());
 
         findViewById(R.id.btn_subs_advanced).setOnClickListener(v -> showSubsAdvancedDialog());
         if (!LiveSubtitleService.isSupported()) {
@@ -159,9 +157,56 @@ public class MainActivity extends AppCompatActivity {
         updateVoiceInputStatus();
     }
 
+    private void openLiveSubtitleEntry() {
+        if (Settings.canDrawOverlays(this)) {
+            launchLiveSubtitleActivity();
+            return;
+        }
+
+        mWaitingForSubtitleOverlayPermission = true;
+        android.widget.Toast.makeText(this,
+                getString(R.string.subs_grant_overlay),
+                android.widget.Toast.LENGTH_LONG).show();
+        try {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    android.net.Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to open overlay settings", e);
+            try {
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        android.net.Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+            } catch (Exception e2) {
+                Log.e(TAG, "Failed to open app settings", e2);
+                mWaitingForSubtitleOverlayPermission = false;
+                android.widget.Toast.makeText(this,
+                        getString(R.string.subs_overlay_required),
+                        android.widget.Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void launchLiveSubtitleActivity() {
+        startActivity(new Intent(this, LiveSubtitleActivity.class));
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Request overlay access before opening the live-subtitle translation screen.
+        if (mWaitingForSubtitleOverlayPermission) {
+            mWaitingForSubtitleOverlayPermission = false;
+            if (Settings.canDrawOverlays(this)) {
+                launchLiveSubtitleActivity();
+            } else {
+                android.widget.Toast.makeText(this,
+                        getString(R.string.subs_overlay_required),
+                        android.widget.Toast.LENGTH_SHORT).show();
+            }
+        }
+
         // Re-check on return from the keyboard chooser, settings, or a test run.
         updateVoiceInputStatus();
         updateModelState();
