@@ -198,7 +198,7 @@ public class LiveSubtitleService extends Service {
         // language and the classic pipeline; an explicit target arms the
         // on-device translator for this session only.
         mTranslationTarget = SubtitlePrefs.getTranslationTarget(this);
-        mModelLanguage = MarkerFileHelper.readString(this, "model_language", "auto");
+        mModelLanguage = readModelLanguage();
         mTranslationMode = !SubtitleTranslationTargets.AUTO.equals(mTranslationTarget);
         mTranslator = mTranslationMode ? new OnDeviceSubtitleTranslator() : null;
         mTranslationGeneration++;
@@ -697,6 +697,19 @@ public class LiveSubtitleService extends Service {
             }
         }
         mSubtitleText.setText(visible);
+    }
+
+    /** Reads the optional language hint used by imported speech models. */
+    private String readModelLanguage() {
+        java.io.File file = new java.io.File(getFilesDir(), "model_language");
+        if (!file.exists()) return "auto";
+        try {
+            return new String(java.nio.file.Files.readAllBytes(file.toPath()),
+                    java.nio.charset.StandardCharsets.UTF_8).trim();
+        } catch (java.io.IOException e) {
+            Log.w(TAG, "Could not read model language preference", e);
+            return "auto";
+        }
     }
 
     private void createNotificationChannel() {
