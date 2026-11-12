@@ -76,8 +76,20 @@ public class LiveSubtitleActivity extends AppCompatActivity {
         if (Settings.canDrawOverlays(this)) {
             showTranslationScreen();
         } else {
-            mWaitingForOverlayPermission = true;
-            openOverlaySettings();
+            // Defer launching Settings until the activity has entered its
+            // foreground, so onResume does not mistake the initial launch
+            // for a return from the permission screen.
+            getWindow().getDecorView().post(() -> {
+                if (isFinishing()) {
+                    return;
+                }
+                if (Settings.canDrawOverlays(this)) {
+                    showTranslationScreen();
+                } else {
+                    mWaitingForOverlayPermission = true;
+                    openOverlaySettings();
+                }
+            });
         }
     }
 
