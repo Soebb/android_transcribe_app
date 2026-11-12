@@ -1,70 +1,55 @@
 package dev.notune.transcribe;
 
-import java.util.Locale;
-
-/**
- * Resolves subtitle source language for the English/Persian-only translator.
- * A fixed supported model language takes precedence, followed by ML Kit
- * language identification and Persian-script detection. Unsupported or
- * uncertain languages are left untranslated.
- */
+/** Resolves source languages supported by the installed ML Kit translator. */
 public final class SourceLanguageResolver {
     private SourceLanguageResolver() {}
 
     public static final String UNDETERMINED = "und";
 
-    /** Resolves a supported source code from the selected model language. */
+    /** Resolves a supported source code from the selected speech-model tag. */
     public static String resolve(String text, String modelLanguageTag) {
         String fromModel = primaryCode(modelLanguageTag);
-        if (fromModel != null) return fromModel;
-        return detectFromText(text);
+        return fromModel != null ? fromModel : detectFromText(text);
     }
 
-    /** Returns only English or Persian model-language codes. */
+    /** Normalizes a model-language tag to an ML Kit language code. */
     public static String primaryCode(String tag) {
-        return supportedCode(SubtitleTranslationTargets.primaryTag(tag));
+        return SubtitleTranslationTargets.mlKitCode(tag);
     }
 
-    /** Returns only English or Persian from an ML Kit language-ID result. */
+    /** Accepts an identified language only when ML Kit Translation supports it. */
     public static String identifiedCode(String identifiedTag) {
-        if (identifiedTag == null) return null;
-        String tag = identifiedTag.trim();
-        if (tag.isEmpty() || tag.equalsIgnoreCase(UNDETERMINED)
-                || tag.toLowerCase(Locale.ROOT).endsWith("-latn")) return null;
-        return supportedCode(SubtitleTranslationTargets.primaryTag(tag));
+        if (identifiedTag == null || identifiedTag.trim().isEmpty()
+                || UNDETERMINED.equalsIgnoreCase(identifiedTag.trim())) {
+            return null;
+        }
+        return SubtitleTranslationTargets.mlKitCode(identifiedTag);
     }
 
     /**
-     * Prefers ML Kit identification, then Persian-script detection, then the
-     * last confidently detected supported session language.
+     * Prefer ML Kit Language ID, then script detection, then the last
+     * confidently detected supported language in this session.
      */
     public static String pickSource(String identifiedTag, String text, String sessionLanguage) {
         String identified = identifiedCode(identifiedTag);
         if (identified != null) return identified;
+
         String heuristic = detectFromText(text);
         if (heuristic != null) return heuristic;
-        return supportedCode(sessionLanguage);
+
+        return primaryCode(sessionLanguage);
     }
 
-    private static String supportedCode(String code) {
-        if ("en".equals(code) || "fa".equals(code)) return code;
-        return null;
-    }
-
-    /**
-     * Detects Persian from its Arabic-derived script. English is identified
-     * through ML Kit; plain Latin text alone is not enough to distinguish it
-     * reliably from other languages.
-     */
+    /** Detects Persian text when Language ID cannot confidently identify it. */
     public static String detectFromText(String text) {
         if (text == null || text.isEmpty()) return null;
         for (int i = 0; i < text.length();) {
-            int cp = text.codePointAt(i);
-            i += Character.charCount(cp);
-            if ((cp >= 0x0600 && cp <= 0x06FF)
-                    || (cp >= 0x0750 && cp <= 0x077F)
-                    || (cp >= 0x08A0 && cp <= 0x08FF)) {
-                return "fa";
+            int codePoint = text.codePointAt(i);
+            i += Character.charCount(codePoint);
+            if ((codePoint >= 0x0600 && codePoint <= 0x06FF)
+                    || (codePoint >= 0x0750 && codePoint <= 0x077F)
+                    || (codePoint >= 0x08A0 && codePoint <= 0x08FF)) {
+                return SubtitleTranslationTargets.mlKitCode("fa");
             }
         }
         return null;
