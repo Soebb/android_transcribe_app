@@ -154,7 +154,7 @@ public class LiveSubtitleActivity extends AppCompatActivity {
      * Models screen's language dropdown.
      */
     private void setupSubtitleTranslationSpinner(Spinner spinner) {
-        List<String> tags = new ArrayList<>(SubtitleTranslationTargets.TAGS);
+        List<String> tags = SubtitleTranslationTargets.getTags();
         List<String> labels = new ArrayList<>(tags.size());
         for (String tag : tags) {
             labels.add(SubtitleTranslationTargets.AUTO.equals(tag)
